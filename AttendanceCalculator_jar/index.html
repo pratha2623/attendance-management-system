@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pratha's Attendance Tracker | Elite Edition</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <div class="app-container">
+        
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="brand-icon">P</div>
+                <span class="brand-name">Pratha's Tracker</span>
+            </div>
+            
+            <nav class="nav-menu">
+                <li class="nav-item active" data-tab="dashboard">
+                    <button>
+                        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+                        <span>Dashboard</span>
+                    </button>
+                </li>
+                <li class="nav-item" data-tab="timetable">
+                    <button>
+                        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        <span>Timetable</span>
+                    </button>
+                </li>
+                <li class="nav-item" data-tab="predictions">
+                    <button>
+                        <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                        <span>Predictions</span>
+                    </button>
+                </li>
+                <li class="nav-item" data-tab="calendar-logs">
+                    <button>
+                        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                        <span>History & Logs</span>
+                    </button>
+                </li>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <p>v2.0 Premium</p>
+                <p>Local Storage Active</p>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            
+            <!-- Content Header -->
+            <header class="content-header">
+                <div class="header-title">
+                    <h1 id="page-title">Dashboard</h1>
+                    <p id="page-subtitle">Welcome back, Pratha. Here is your current attendance standing.</p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-secondary" id="btn-export">Export Data</button>
+                    <button class="btn btn-secondary" id="btn-import-trigger">Import Data</button>
+                    <input type="file" id="file-import" accept=".json" style="display: none;">
+                    <button class="btn btn-primary" id="btn-add-subject">
+                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        Add Subject
+                    </button>
+                </div>
+            </header>
+
+            <!-- Alerts Banner Widget (Dynamically toggled by JS) -->
+            <div class="alert-banner" id="danger-alert" style="display: none;">
+                <div class="alert-banner-content">
+                    <div class="alert-banner-icon">
+                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    </div>
+                    <div class="alert-banner-text">
+                        <h4 id="alert-title">Critical Subject Warning</h4>
+                        <p id="alert-description">Your attendance in EVS is below the 75% threshold! You cannot miss the next class.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= TAB: DASHBOARD ================= -->
+            <div class="tab-content active" id="tab-dashboard">
+                <!-- Metrics Grid -->
+                <div class="metrics-row">
+                    <!-- Circular Gauge Metric -->
+                    <div class="glass-card metric-card metric-card-large glow-primary">
+                        <div class="metric-info">
+                            <h3>Overall Status</h3>
+                            <div class="value" id="overall-percentage-txt">--%</div>
+                            <div class="subtext" id="overall-fraction-txt">-- / -- Classes</div>
+                        </div>
+                        <div class="progress-ring-container">
+                            <svg class="progress-ring" width="120" height="120">
+                                <circle class="progress-ring-circle-bg" cx="60" cy="60" r="50"/>
+                                <circle class="progress-ring-circle" id="overall-progress-circle" cx="60" cy="60" r="50"/>
+                            </svg>
+                            <div class="progress-ring-text">
+                                <span class="progress-ring-value" id="ring-pct">0%</span>
+                                <span class="progress-ring-label">Target 75%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Metric: Target Status -->
+                    <div class="glass-card metric-card glow-success" id="card-status-health">
+                        <div class="metric-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                        </div>
+                        <div class="metric-info">
+                            <h3>Standing</h3>
+                            <div class="value text-success" id="status-health-txt">Excellent</div>
+                            <div class="subtext" id="status-health-desc">All subjects are safe!</div>
+                        </div>
+                    </div>
+
+                    <!-- Metric: Dangerous Subject -->
+                    <div class="glass-card metric-card glow-danger" id="card-danger-sub">
+                        <div class="metric-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                        </div>
+                        <div class="metric-info">
+                            <h3>At Risk</h3>
+                            <div class="value" id="danger-sub-name">None</div>
+                            <div class="subtext" id="danger-sub-desc">Keep it up!</div>
+                        </div>
+                    </div>
+
+                    <!-- Metric: Stats Info -->
+                    <div class="glass-card metric-card glow-warning" id="card-quick-tip">
+                        <div class="metric-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                        </div>
+                        <div class="metric-info">
+                            <h3>Recommendations</h3>
+                            <div class="value" style="font-size: 1.15rem; font-weight: 600;" id="quick-tip-title">Safe to Skip</div>
+                            <div class="subtext" id="quick-tip-desc">You can skip classes safely.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Subjects Cards Header -->
+                <div class="section-title-row">
+                    <h2>Tracked Subjects</h2>
+                </div>
+
+                <!-- Subject Cards Grid -->
+                <div class="subject-grid" id="subject-cards-container">
+                    <!-- Cards will be dynamically injected here -->
+                </div>
+            </div>
+
+            <!-- ================= TAB: TIMETABLE ================= -->
+            <div class="tab-content" id="tab-timetable">
+                <div class="glass-card timetable-card">
+                    <div class="timetable-grid">
+                        <!-- Header row -->
+                        <div class="timetable-header-cell">Time</div>
+                        <div class="timetable-header-cell">Monday</div>
+                        <div class="timetable-header-cell">Tuesday</div>
+                        <div class="timetable-header-cell">Wednesday</div>
+                        <div class="timetable-header-cell">Thursday</div>
+                        <div class="timetable-header-cell">Friday</div>
+
+                        <!-- Period 1 -->
+                        <div class="timetable-time-cell">09:00 AM</div>
+                        <div class="timetable-slot" data-day="0" data-period="0"></div>
+                        <div class="timetable-slot" data-day="1" data-period="0"></div>
+                        <div class="timetable-slot" data-day="2" data-period="0"></div>
+                        <div class="timetable-slot" data-day="3" data-period="0"></div>
+                        <div class="timetable-slot" data-day="4" data-period="0"></div>
+
+                        <!-- Period 2 -->
+                        <div class="timetable-time-cell">10:00 AM</div>
+                        <div class="timetable-slot" data-day="0" data-period="1"></div>
+                        <div class="timetable-slot" data-day="1" data-period="1"></div>
+                        <div class="timetable-slot" data-day="2" data-period="1"></div>
+                        <div class="timetable-slot" data-day="3" data-period="1"></div>
+                        <div class="timetable-slot" data-day="4" data-period="1"></div>
+
+                        <!-- Period 3 -->
+                        <div class="timetable-time-cell">11:15 AM</div>
+                        <div class="timetable-slot" data-day="0" data-period="2"></div>
+                        <div class="timetable-slot" data-day="1" data-period="2"></div>
+                        <div class="timetable-slot" data-day="2" data-period="2"></div>
+                        <div class="timetable-slot" data-day="3" data-period="2"></div>
+                        <div class="timetable-slot" data-day="4" data-period="2"></div>
+
+                        <!-- Period 4 -->
+                        <div class="timetable-time-cell">12:15 PM</div>
+                        <div class="timetable-slot" data-day="0" data-period="3"></div>
+                        <div class="timetable-slot" data-day="1" data-period="3"></div>
+                        <div class="timetable-slot" data-day="2" data-period="3"></div>
+                        <div class="timetable-slot" data-day="3" data-period="3"></div>
+                        <div class="timetable-slot" data-day="4" data-period="3"></div>
+
+                        <!-- Period 5 -->
+                        <div class="timetable-time-cell">02:00 PM</div>
+                        <div class="timetable-slot" data-day="0" data-period="4"></div>
+                        <div class="timetable-slot" data-day="1" data-period="4"></div>
+                        <div class="timetable-slot" data-day="2" data-period="4"></div>
+                        <div class="timetable-slot" data-day="3" data-period="4"></div>
+                        <div class="timetable-slot" data-day="4" data-period="4"></div>
+
+                        <!-- Period 6 -->
+                        <div class="timetable-time-cell">03:00 PM</div>
+                        <div class="timetable-slot" data-day="0" data-period="5"></div>
+                        <div class="timetable-slot" data-day="1" data-period="5"></div>
+                        <div class="timetable-slot" data-day="2" data-period="5"></div>
+                        <div class="timetable-slot" data-day="3" data-period="5"></div>
+                        <div class="timetable-slot" data-day="4" data-period="5"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= TAB: PREDICTIONS ================= -->
+            <div class="tab-content" id="tab-predictions">
+                <div class="simulator-panel">
+                    
+                    <!-- Sim Configuration -->
+                    <div class="glass-card sim-selectors">
+                        <div class="form-group">
+                            <label for="sim-subject-select">Select Subject</label>
+                            <select class="form-control" id="sim-subject-select">
+                                <!-- Populated dynamically -->
+                            </select>
+                        </div>
+                        
+                        <div class="form-group range-slider-wrapper">
+                            <label for="sim-attend-slider">Classes to Attend consecutively</label>
+                            <input type="range" class="range-input" id="sim-attend-slider" min="0" max="30" value="0">
+                            <div class="range-slider-labels">
+                                <span>0</span>
+                                <span id="sim-attend-value-lbl">0 classes</span>
+                                <span>30</span>
+                            </div>
+                        </div>
+
+                        <div class="form-group range-slider-wrapper">
+                            <label for="sim-miss-slider">Classes to Miss consecutively</label>
+                            <input type="range" class="range-input" id="sim-miss-slider" min="0" max="30" value="0">
+                            <div class="range-slider-labels">
+                                <span>0</span>
+                                <span id="sim-miss-value-lbl">0 classes</span>
+                                <span>30</span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="sim-target-pct">Calculate Path to Target %</label>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <input type="number" class="form-control" id="sim-target-pct" value="75" min="1" max="100">
+                                <button class="btn btn-primary" id="btn-calc-target">Calculate</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sim Results -->
+                    <div class="glass-card sim-results glow-primary">
+                        <h2 style="font-family: var(--font-heading); font-size: 1.5rem; font-weight: 600; z-index: 1;">Projected Outcome</h2>
+                        
+                        <div class="sim-graphics-row">
+                            <div class="sim-compare-val">
+                                <span class="val-label">Current</span>
+                                <span class="val-num" id="sim-current-pct">--%</span>
+                            </div>
+                            
+                            <div class="sim-compare-arrow">&rarr;</div>
+                            
+                            <div class="sim-compare-val">
+                                <span class="val-label">Projected</span>
+                                <span class="val-num" id="sim-projected-pct">--%</span>
+                            </div>
+                        </div>
+
+                        <div class="sim-summary-box">
+                            <p id="sim-summary-text">Select a subject and adjust sliders to simulate outcomes.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= TAB: CALENDAR & LOGS ================= -->
+            <div class="tab-content" id="tab-calendar-logs">
+                <div class="history-layout">
+                    <!-- Interactive Calendar -->
+                    <div class="glass-card calendar-card">
+                        <div class="calendar-header">
+                            <button class="action-btn-mini" id="btn-prev-month">&larr;</button>
+                            <h3 id="calendar-month-title">June 2026</h3>
+                            <button class="action-btn-mini" id="btn-next-month">&rarr;</button>
+                        </div>
+
+                        <div style="margin-bottom: 1.25rem;">
+                            <label for="calendar-filter-subject" style="font-size: 0.8rem; color: var(--text-secondary); display: block; margin-bottom: 0.25rem;">Filter Calendar by Subject</label>
+                            <select class="form-control" id="calendar-filter-subject">
+                                <option value="all">Show All Subjects</option>
+                                <!-- Injected dynamically -->
+                            </select>
+                        </div>
+
+                        <div class="calendar-days-grid" id="calendar-days-container">
+                            <!-- Weekdays & cells generated dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Logs List -->
+                    <div class="glass-card logs-card">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <h3 style="font-family: var(--font-heading); font-size: 1.15rem; font-weight: 600;">Activity History</h3>
+                            <button class="btn btn-secondary btn-icon-only" id="btn-clear-logs" title="Clear All History">
+                                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                            </button>
+                        </div>
+                        <ul class="logs-list" id="logs-list-container">
+                            <!-- Injected dynamically -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- ================= MODAL: ADD/EDIT SUBJECT ================= -->
+    <div class="modal-overlay" id="modal-subject-overlay">
+        <div class="glass-card modal">
+            <div class="modal-header">
+                <h3 id="subject-modal-title">Add Subject</h3>
+                <button class="modal-close" id="btn-close-subject-modal">&times;</button>
+            </div>
+            
+            <input type="hidden" id="modal-subject-index" value="">
+
+            <div class="form-group">
+                <label for="modal-subject-name">Subject Name</label>
+                <input type="text" class="form-control" id="modal-subject-name" placeholder="e.g. Physics" required>
+            </div>
+
+            <div class="form-group">
+                <label for="modal-subject-total">Total Classes Conducted</label>
+                <input type="number" class="form-control" id="modal-subject-total" placeholder="0" min="0" required>
+            </div>
+
+            <div class="form-group">
+                <label for="modal-subject-attended">Classes Attended</label>
+                <input type="number" class="form-control" id="modal-subject-attended" placeholder="0" min="0" required>
+            </div>
+
+            <div class="form-group">
+                <label for="modal-subject-required">Required Percentage (%)</label>
+                <input type="number" class="form-control" id="modal-subject-required" value="75" min="0" max="100" required>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="btn-cancel-subject-modal">Cancel</button>
+                <button class="btn btn-primary" id="btn-save-subject">Save Subject</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MODAL: TIMETABLE SLOT SETUP ================= -->
+    <div class="modal-overlay" id="modal-slot-overlay">
+        <div class="glass-card modal">
+            <div class="modal-header">
+                <h3>Assign Class Slot</h3>
+                <button class="modal-close" id="btn-close-slot-modal">&times;</button>
+            </div>
+            
+            <input type="hidden" id="modal-slot-day" value="">
+            <input type="hidden" id="modal-slot-period" value="">
+
+            <div class="form-group">
+                <label for="modal-slot-subject">Select Subject for this Slot</label>
+                <select class="form-control" id="modal-slot-subject">
+                    <option value="">-- Clear Slot / Empty --</option>
+                    <!-- Injected dynamically -->
+                </select>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="btn-cancel-slot-modal">Cancel</button>
+                <button class="btn btn-primary" id="btn-save-slot">Save Slot</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MODAL: LOG ATTENDANCE FOR CALENDAR DAY ================= -->
+    <div class="modal-overlay" id="modal-log-day-overlay">
+        <div class="glass-card modal">
+            <div class="modal-header">
+                <h3>Log Attendance for Day</h3>
+                <button class="modal-close" id="btn-close-log-day-modal">&times;</button>
+            </div>
+            
+            <input type="hidden" id="modal-log-date" value="">
+
+            <div class="form-group">
+                <label id="modal-log-day-label" style="font-weight: 600; font-size: 1.05rem;">Date: June 5, 2026</label>
+            </div>
+
+            <div class="form-group">
+                <label for="modal-log-subject">Subject</label>
+                <select class="form-control" id="modal-log-subject">
+                    <!-- Populated dynamically -->
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Status</label>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem; margin-top: 0.25rem;">
+                    <button class="btn btn-secondary" id="btn-log-status-present" style="border-color: rgba(16, 185, 129, 0.2); background: rgba(16, 185, 129, 0.05); color: var(--success);">Present</button>
+                    <button class="btn btn-secondary" id="btn-log-status-absent" style="border-color: rgba(239, 68, 68, 0.2); background: rgba(239, 68, 68, 0.05); color: var(--danger);">Absent</button>
+                    <button class="btn btn-secondary" id="btn-log-status-holiday" style="border-color: rgba(245, 158, 11, 0.2); background: rgba(245, 158, 11, 0.05); color: var(--warning);">Holiday</button>
+                </div>
+            </div>
+
+            <div class="modal-footer" style="justify-content: space-between;">
+                <button class="btn btn-danger" id="btn-delete-log-day" style="display: none;">Delete Entry</button>
+                <div style="display: flex; gap: 0.5rem; margin-left: auto;">
+                    <button class="btn btn-secondary" id="btn-cancel-log-day-modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Core App Logic -->
+    <script src="app.js"></script>
+</body>
+</html>
