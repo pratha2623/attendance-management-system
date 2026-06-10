@@ -25,3 +25,17 @@ A web-based attendance management application designed to help students track at
 - Cloud database integration
 - Mobile responsiveness
 - Attendance reports and statistics
+
+## Screenshots
+
+### Dashboard
+![Dashboard](screenshots/dashboard.png)
+
+### Attendance Predictions
+![Predictions](screenshots/predictions.png)
+
+### Timetable Management
+![Timetable](screenshots/timetable.png)
+
+### History & Logs
+![History](screenshots/history.png)
